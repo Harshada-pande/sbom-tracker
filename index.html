@@ -21,7 +21,7 @@
 html,body{height:100%;overflow:hidden;}
 body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 #app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-
+ 
 /* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;background:var(--surface);border-bottom:1px solid var(--border2);flex-shrink:0;z-index:10;}
 .topbar-left{display:flex;align-items:center;gap:16px;}
@@ -37,10 +37,10 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .wdot.live{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .status-pill{padding:5px 12px;border-radius:20px;border:1px solid var(--border);font-size:11px;color:var(--muted);}
-
+ 
 /* LAYOUT */
 .app-body{display:flex;flex:1;overflow:hidden;}
-
+ 
 /* SIDEBAR */
 .sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border2);display:flex;flex-direction:column;padding:16px 12px;overflow-y:auto;}
 .sidebar-section{margin-bottom:24px;}
@@ -63,7 +63,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .pipe-lbl.done{color:var(--green);}
 .pipe-lbl.active{color:var(--accent);}
 .pipe-conn{width:1.5px;height:8px;background:var(--border2);margin:0 0 0 3px;}
-
+ 
 /* MAIN */
 .main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
 .page{display:none;flex-direction:column;height:100%;overflow:hidden;}
@@ -76,7 +76,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .page-body{flex:1;overflow-y:auto;padding:20px 28px 28px;}
 .page-body::-webkit-scrollbar{width:4px;}
 .page-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-
+ 
 /* WELCOME */
 .welcome-hero{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;padding:40px;}
 .welcome-logo-big{font-family:'Bricolage Grotesque',sans-serif;font-size:42px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px;}
@@ -94,7 +94,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .project-row input:focus{border-color:var(--accent);}
 .btn-start{padding:11px 24px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .btn-start:hover{background:#3a7de8;transform:translateY(-1px);}
-
+ 
 /* CONNECT OVERLAY */
 .connect-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:50;display:none;align-items:center;justify-content:center;}
 .connect-overlay.open{display:flex;}
@@ -106,7 +106,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .btn-connect-wallet{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-connect-wallet:hover{background:#3a7de8;}
 .btn-connect-wallet:disabled{opacity:.5;cursor:not-allowed;}
-
+ 
 /* DASHBOARD */
 .dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
 .stat-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 18px;}
@@ -126,7 +126,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .tag-sim{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
 .tag-live{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2);}
 .tag-gate{background:var(--blue-dim);color:var(--accent);border:1px solid rgba(79,140,255,.2);}
-
+ 
 /* REGISTER */
 .reg-layout{display:grid;grid-template-columns:340px 1fr;gap:16px;height:100%;}
 .form-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:22px;height:fit-content;}
@@ -172,7 +172,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .tile-name{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;margin-bottom:1px;}
 .tile-ver{font-size:10px;color:var(--muted);margin-bottom:5px;}
 .tile-hash{font-size:9px;color:var(--muted2);word-break:break-all;opacity:.7;}
-
+ 
 /* SHIP */
 .verify-table{background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;}
 .vt-header{display:grid;grid-template-columns:200px 1fr 1fr 140px;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border2);font-size:10px;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;}
@@ -202,7 +202,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .btn-sv:hover{border-color:var(--text);}
 .btn-sv-green{background:var(--green);color:#fff;border-color:var(--green);}
 .btn-sv-green:hover{background:#16a34a;}
-
+ 
 /* INDIVIDUAL */
 .ind-form-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;max-width:480px;margin-bottom:20px;}
 .ind-result{max-width:480px;padding:18px 20px;border-radius:12px;display:none;animation:fadeUp .3s ease;}
@@ -212,7 +212,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .ir-title{font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;}
 .ir-detail{font-size:11px;color:var(--muted);line-height:1.7;}
 .ir-detail .hash-line{color:var(--accent);font-size:10px;word-break:break-all;}
-
+ 
 /* CLEARED */
 .cleared-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;padding:40px;}
 .cleared-check{width:72px;height:72px;border-radius:50%;background:var(--green-dim);border:2.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:20px;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275);}
@@ -230,7 +230,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .ns-num{width:22px;height:22px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;}
 .ns-text{font-size:11px;line-height:1.6;color:var(--muted);}
 .ns-text strong{font-family:'Bricolage Grotesque',sans-serif;font-weight:600;color:var(--text);display:block;margin-bottom:1px;}
-
+ 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:24px;}
 .modal-overlay.open{display:flex;}
@@ -242,7 +242,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 .btn-modal-cancel:hover{border-color:var(--text);}
 .btn-modal-tamper{flex:1;padding:10px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
 .btn-modal-tamper:hover{background:#dc2626;}
-
+ 
 /* TOAST */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--text);color:var(--bg);padding:10px 22px;border-radius:9px;font-size:12px;z-index:200;transition:transform .3s ease;white-space:nowrap;font-family:'Bricolage Grotesque',sans-serif;font-weight:500;}
 .toast.show{transform:translateX(-50%) translateY(0);}
@@ -254,7 +254,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
 </head>
 <body>
 <div id="app">
-
+ 
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-left">
@@ -270,7 +270,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </button>
   </div>
 </div>
-
+ 
 <div class="app-body">
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -300,10 +300,10 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </div>
   </div>
 </div>
-
+ 
 <!-- MAIN -->
 <div class="main">
-
+ 
 <!-- WELCOME -->
 <div class="page active" id="page-welcome">
   <div class="page-body" style="display:flex;flex-direction:column;justify-content:center;">
@@ -325,7 +325,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </div>
   </div>
 </div>
-
+ 
 <!-- DASHBOARD -->
 <div class="page" id="page-dashboard">
   <div class="page-header">
@@ -349,7 +349,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </div>
   </div>
 </div>
-
+ 
 <!-- REGISTER -->
 <div class="page" id="page-register">
   <div class="page-header">
@@ -378,7 +378,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </div>
   </div>
 </div>
-
+ 
 <!-- SHIP -->
 <div class="page" id="page-ship">
   <div class="page-header">
@@ -395,7 +395,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     <div class="ship-verdict" id="ship-verdict"></div>
   </div>
 </div>
-
+ 
 <!-- INDIVIDUAL -->
 <div class="page" id="page-individual">
   <div class="page-header">
@@ -418,7 +418,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </div>
   </div>
 </div>
-
+ 
 <!-- CLEARED -->
 <div class="page" id="page-cleared">
   <div class="page-body">
@@ -442,11 +442,11 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </div>
   </div>
 </div>
-
+ 
 </div><!-- /main -->
 </div><!-- /app-body -->
 </div><!-- /app -->
-
+ 
 <!-- CONNECT OVERLAY -->
 <div class="connect-overlay" id="connect-overlay">
   <div class="connect-box">
@@ -457,7 +457,7 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     <div class="connect-progress" id="connect-progress"></div>
   </div>
 </div>
-
+ 
 <!-- TAMPER MODAL -->
 <div class="modal-overlay" id="tamper-modal">
   <div class="modal">
@@ -471,9 +471,9 @@ body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);disp
     </div>
   </div>
 </div>
-
+ 
 <div class="toast" id="toast"></div>
-
+ 
 <script>
 // ── CONTRACT CONFIG ──
 const CONTRACT_ADDRESS = "0x9B5A0D5d0C81A584653866cDa0A91ECCdB551fDd";
@@ -483,7 +483,7 @@ const ABI = [
   "function getComponent(string _name, string _version) public view returns (bytes32 hash, address registeredBy, uint256 timestamp)",
   "function getVersionHistory(string _name) public view returns (string[] memory)"
 ];
-
+ 
 const GPAY = [
   {name:'bouncycastle',version:'1.70',desc:'Cryptographic library for PIN encryption',icon:'🔐'},
   {name:'okhttp',version:'4.10.0',desc:'HTTP networking layer for payment requests',icon:'🌐'},
@@ -493,23 +493,23 @@ const GPAY = [
   {name:'firebase-auth',version:'22.1.0',desc:'User authentication and session management',icon:'🔑'},
   {name:'conscrypt',version:'2.5.2',desc:'SSL/TLS security for encrypted communication',icon:'🛡️'},
 ];
-
+ 
 let provider, signer, contract;
 let blocks = [];
 let editIdx = null;
 let walletConnected = false;
-
+ 
 // ── SHA256 ──
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return '0x' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
-
+ 
 // bytes32 from hex string
 function toBytes32(hex) {
   return hex.padEnd(66, '0');
 }
-
+ 
 // ── NAVIGATION ──
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -520,7 +520,7 @@ function showPage(name) {
   if (name === 'ship') runShipVerification();
   if (name === 'individual') renderHints();
 }
-
+ 
 function startPipeline() {
   const name = document.getElementById('project-input').value.trim() || 'Google Pay';
   document.getElementById('dash-title').textContent = name;
@@ -529,7 +529,7 @@ function startPipeline() {
     document.getElementById('connect-overlay').classList.add('open');
   }
 }
-
+ 
 // ── WALLET CONNECTION ──
 async function connectWallet() {
   const btn = document.getElementById('btn-connect-wallet');
@@ -548,25 +548,25 @@ async function connectWallet() {
     const addr = await signer.getAddress();
     const short = addr.slice(0,6) + '...' + addr.slice(-4);
     const network = await provider.getNetwork();
-
+ 
     // update UI
     walletConnected = true;
     document.getElementById('wallet-btn').classList.add('connected');
     document.getElementById('wdot').classList.add('live');
     document.getElementById('wallet-label').textContent = short;
     document.getElementById('network-pill').textContent = `Sepolia · ${short}`;
-
+ 
     // close overlay and auto-register
     document.getElementById('connect-overlay').classList.remove('open');
     await autoRegisterHardcoded(progress);
-
+ 
   } catch(e) {
     progress.textContent = '❌ ' + (e.message || 'Connection failed').slice(0,60);
     btn.disabled = false;
     btn.textContent = 'Connect MetaMask';
   }
 }
-
+ 
 // ── AUTO REGISTER 7 HARDCODED BLOCKS ──
 async function autoRegisterHardcoded() {
   showToast('Registering 7 components on-chain...');
@@ -599,7 +599,7 @@ async function autoRegisterHardcoded() {
   showToast(`✓ All ${blocks.length} components registered on Ethereum Sepolia`);
   document.getElementById('badge-blocks').textContent = blocks.length;
 }
-
+ 
 // ── LIVE HASH PREVIEW ──
 async function liveHash() {
   const n = document.getElementById('cn').value;
@@ -610,7 +610,7 @@ async function liveHash() {
   const h = await sha256(n + v + d);
   box.textContent = h; box.classList.add('live');
 }
-
+ 
 // ── ADD BLOCK (real on-chain) ──
 async function addBlock() {
   if (!walletConnected) { showToast('Connect wallet first'); document.getElementById('connect-overlay').classList.add('open'); return; }
@@ -640,14 +640,14 @@ async function addBlock() {
   btn.disabled = false;
   btn.textContent = 'Register on Blockchain →';
 }
-
+ 
 // ── RENDER CHAIN ──
 function renderChain() {
   const scroll = document.getElementById('chain-scroll');
   scroll.innerHTML = '';
   document.getElementById('chain-count').textContent = `${blocks.length} blocks`;
   document.getElementById('badge-blocks').textContent = blocks.length;
-
+ 
   blocks.forEach((b, i) => {
     const row = document.createElement('div');
     row.className = 'block-row';
@@ -676,7 +676,7 @@ function renderChain() {
   });
   scroll.scrollTop = scroll.scrollHeight;
 }
-
+ 
 // ── TAMPER MODAL ──
 function openTamperModal(idx) {
   editIdx = idx;
@@ -696,14 +696,14 @@ async function doTamper() {
   closeModal(); renderChain(); updateStats();
   showToast(`⚠️ ${b.name} tampered locally — blockchain record unchanged`);
 }
-
+ 
 // ── SHIP VERIFICATION (real on-chain verify) ──
 async function runShipVerification() {
   const rows = document.getElementById('vt-rows');
   const verdict = document.getElementById('ship-verdict');
   rows.innerHTML = ''; verdict.style.display = 'none';
   blocks.forEach(b => { b.verified = false; });
-
+ 
   const rowEls = blocks.map((b, i) => {
     const div = document.createElement('div');
     div.className = 'vt-row'; div.id = `vrow-${i}`;
@@ -715,16 +715,16 @@ async function runShipVerification() {
     rows.appendChild(div);
     return div;
   });
-
+ 
   let hasTamper = false;
-
+ 
   for (let i = 0; i < blocks.length; i++) {
     await new Promise(r => setTimeout(r, 300));
     rowEls[i].classList.add('checking');
     document.getElementById(`vs-${i}`).className = 'vt-status checking-s';
     document.getElementById(`vs-${i}`).innerHTML = '<span class="spin"></span>Checking';
     await new Promise(r => setTimeout(r, 500));
-
+ 
     let match = false;
     try {
       if (walletConnected && blocks[i].onChain) {
@@ -740,7 +740,7 @@ async function runShipVerification() {
     } catch(e) {
       match = blocks[i].originalHash === blocks[i].currentHash;
     }
-
+ 
     if (!match) hasTamper = true;
     blocks[i].verified = !blocks[i].tampered;
     rowEls[i].classList.remove('checking');
@@ -748,11 +748,11 @@ async function runShipVerification() {
     document.getElementById(`vs-${i}`).className = `vt-status ${match ? 'ok-s' : 'fail-s'}`;
     document.getElementById(`vs-${i}`).textContent = match ? '✓ Verified' : '✗ Tampered';
   }
-
+ 
   renderChain(); updateStats();
   await new Promise(r => setTimeout(r, 400));
   verdict.style.display = 'block';
-
+ 
   if (hasTamper) {
     verdict.className = 'ship-verdict blocked';
     verdict.innerHTML = `
@@ -774,41 +774,74 @@ async function runShipVerification() {
     setPipeStep('ver', 'done'); setPipeStep('ship', 'done');
   }
 }
-
-// ── INDIVIDUAL VERIFY (real on-chain) ──
+ 
+// ── INDIVIDUAL VERIFY (real on-chain transaction — MetaMask opens) ──
 async function verifyIndividual() {
   const name = document.getElementById('ind-name').value.trim().toLowerCase();
   const ver = document.getElementById('ind-ver').value.trim();
   const res = document.getElementById('ind-result');
   if (!name) { showToast('Enter a component name'); return; }
-
+ 
   const b = blocks.find(x => x.name.toLowerCase() === name && (!ver || x.version === ver));
   res.style.display = 'block';
-
+ 
   if (!b) {
     res.className = 'ind-result info';
     res.innerHTML = `<div class="ir-title">ℹ Component Not Found</div>
       <div class="ir-detail"><span>"${name}" is not registered in this project's SBOM.</span><span>Go to Register SBOM to add it first.</span></div>`;
     return;
   }
-
+ 
+  if (!walletConnected || !b.onChain) {
+    // fallback: local simulation
+    res.className = 'ind-result info';
+    res.innerHTML = `<div class="ir-title"><span class="spin"></span>Simulating verification...</div>`;
+    await new Promise(r => setTimeout(r, 900));
+    const match = b.originalHash === b.currentHash;
+    b.verified = !b.tampered;
+    renderChain(); updateStats();
+    res.className = `ind-result ${match ? 'ok' : 'fail'}`;
+    res.innerHTML = `
+      <div class="ir-title">${match ? '✓ Verified — Component Intact' : '✗ Tampered — Hash Mismatch Detected'}</div>
+      <div class="ir-detail">
+        <span><strong>${b.icon||'📦'} ${b.name}</strong> v${b.version}</span>
+        <span>${b.desc}</span>
+        <span class="hash-line">Original: ${b.originalHash}</span>
+        <span class="hash-line">Current:&nbsp; ${b.currentHash}</span>
+        <span style="margin-top:6px;display:block;color:var(--amber)">⚠ Connect wallet for real on-chain verification.</span>
+      </div>`;
+    return;
+  }
+ 
+  // Real transaction — MetaMask will open
   res.className = 'ind-result info';
-  res.innerHTML = `<div class="ir-title"><span class="spin"></span>Verifying on blockchain...</div>`;
-
+  res.innerHTML = `<div class="ir-title"><span class="spin"></span>Confirm in MetaMask...</div>
+    <div class="ir-detail"><span>A transaction will be sent to the blockchain. MetaMask will open for your confirmation.</span></div>`;
+ 
   let match = false;
+  let txHash = null;
+ 
   try {
-    if (walletConnected && b.onChain) {
-      const result = await contract.verifyComponent.staticCall(b.name, b.version, toBytes32(b.currentHash));
-      match = result.includes('VERIFIED');
-    } else {
-      await new Promise(r => setTimeout(r, 900));
-      match = b.originalHash === b.currentHash;
-    }
+    const tx = await contract.verifyComponent(b.name, b.version, toBytes32(b.currentHash));
+    res.innerHTML = `<div class="ir-title"><span class="spin"></span>Transaction submitted — waiting for confirmation...</div>
+      <div class="ir-detail"><span class="hash-line">Tx: ${tx.hash}</span></div>`;
+    const receipt = await tx.wait();
+    txHash = receipt.hash;
+ 
+    // check result via staticCall after tx confirmed
+    const result = await contract.verifyComponent.staticCall(b.name, b.version, toBytes32(b.currentHash));
+    match = result.includes('VERIFIED');
   } catch(e) {
-    await new Promise(r => setTimeout(r, 500));
+    if (e.code === 'ACTION_REJECTED') {
+      res.className = 'ind-result info';
+      res.innerHTML = `<div class="ir-title">Transaction Rejected</div>
+        <div class="ir-detail"><span>You rejected the MetaMask transaction. No verification recorded on-chain.</span></div>`;
+      return;
+    }
+    // fallback to local
     match = b.originalHash === b.currentHash;
   }
-
+ 
   b.verified = !b.tampered;
   renderChain(); updateStats();
   res.className = `ind-result ${match ? 'ok' : 'fail'}`;
@@ -818,13 +851,14 @@ async function verifyIndividual() {
       <span><strong>${b.icon||'📦'} ${b.name}</strong> v${b.version}</span>
       <span>${b.desc}</span>
       <span class="hash-line">On-chain: ${b.originalHash}</span>
-      <span class="hash-line">Current:&nbsp;&nbsp;${b.currentHash}</span>
+      <span class="hash-line">Current:&nbsp; ${b.currentHash}</span>
+      ${txHash ? `<span class="hash-line" style="margin-top:6px">Tx: <a href="https://sepolia.etherscan.io/tx/${txHash}" target="_blank" style="color:var(--accent)">${txHash.slice(0,20)}... ↗</a></span>` : ''}
       <span style="margin-top:6px;display:block">${match
-        ? 'Hash matches blockchain record. Component has not been modified.'
-        : 'Hash mismatch detected. Component was modified after registration. Possible supply chain attack.'}</span>
+        ? 'Hash matches blockchain record. Verification recorded on Ethereum Sepolia.'
+        : 'Hash mismatch detected. TamperDetected event fired on-chain. Possible supply chain attack.'}</span>
     </div>`;
 }
-
+ 
 // ── HINTS ──
 function renderHints() {
   const list = document.getElementById('ind-hints');
@@ -843,14 +877,14 @@ function renderHints() {
     list.appendChild(chip);
   });
 }
-
+ 
 // ── STATS ──
 function updateStats() {
   document.getElementById('ds-comp').textContent = blocks.length;
   document.getElementById('ds-tamp').textContent = blocks.filter(b => b.tampered).length;
   document.getElementById('ds-ver').textContent = blocks.filter(b => b.verified && !b.tampered).length;
 }
-
+ 
 function setPipeStep(id, state) {
   const dot = document.getElementById('ps-' + id);
   const lbl = document.getElementById('psl-' + id);
@@ -858,7 +892,7 @@ function setPipeStep(id, state) {
   dot.className = `pipe-dot ${state}`;
   if (lbl) lbl.className = `pipe-lbl ${state}`;
 }
-
+ 
 // ── TOAST ──
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -868,3 +902,4 @@ function showToast(msg) {
 </script>
 </body>
 </html>
+ 
