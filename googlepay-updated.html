@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Pay — SBOM Integrity Gateway</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<style>
+:root {
+  --navy: #012652;
+  --blue: #0D94FB;
+  --white: #FFFFFF;
+  --lgray: #F8FAFC;
+  --sgray: #F1F5FA;
+  --slate: #243547;
+  --charcoal: #0C1927;
+  --green: #00BE5F;
+  --lgreen: #A0F150;
+  --border: #E2EAF4;
+  --border2: #EEF3FA;
+  --muted: #5A7184;
+  --muted2: #8FA3B8;
+  --red: #E53E3E;
+  --red-dim: rgba(229,62,62,.08);
+  --red-bdr: rgba(229,62,62,.22);
+  --amber: #DD6B20;
+  --g-blue:#4285f4; --g-red:#ea4335; --g-yellow:#fbbc04; --g-green:#34a853;
+  --sh-sm: 0 1px 4px rgba(1,38,82,.07);
+  --sh: 0 4px 16px rgba(1,38,82,.1);
+  --sh-lg: 0 12px 40px rgba(1,38,82,.15);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body { font-family:'Plus Jakarta Sans', sans-serif; background:var(--sgray); color:var(--charcoal); }
+#app { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+
+/* ── TOPBAR ── */
+.topbar {
+  height:56px; padding:0 24px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--white); border-bottom:1px solid var(--border);
+  flex-shrink:0; box-shadow:var(--sh-sm); z-index:10;
+}
+.tl { display:flex; align-items:center; gap:14px; }
+.gpay { display:flex; align-items:center; font-size:18px; font-weight:800; letter-spacing:-.03em; }
+.g1{color:var(--g-blue)}.g2{color:var(--g-red)}.g3{color:var(--g-yellow)}.g4{color:var(--g-blue)}.g5{color:var(--g-green)}.g6{color:var(--g-red)}.gp{color:var(--charcoal);margin-left:2px;}
+.tsep { width:1px; height:18px; background:var(--border); }
+.ttl { font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
+.tr { display:flex; align-items:center; gap:8px; }
+.npill {
+  display:flex; align-items:center; gap:6px;
+  padding:5px 12px; border-radius:20px;
+  background:var(--lgray); border:1px solid var(--border);
+  font-size:11px; font-weight:500; color:var(--muted);
+}
+.ndot { width:6px; height:6px; border-radius:50%; background:var(--muted2); flex-shrink:0; }
+.ndot.on { background:var(--green); box-shadow:0 0 0 2px rgba(0,190,95,.2); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.wbtn {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 14px; border-radius:8px;
+  border:1.5px solid var(--border); background:var(--white);
+  color:var(--slate); font-size:12px; font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:all .15s;
+}
+.wbtn:hover { border-color:var(--blue); color:var(--blue); background:rgba(13,148,251,.05); }
+.wbtn.on { border-color:var(--green); color:var(--green); background:rgba(0,190,95,.05); }
+
+/* ── MODE BANNER ── */
+.mbanner {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:7px 24px; font-size:12px; font-weight:500;
+  background:var(--white); border-bottom:1px solid var(--border); flex-shrink:0;
+  color:var(--slate);
+}
+.mbanner.live { color:var(--green); }
+.mlivdot { width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 2px rgba(0,190,95,.2); flex-shrink:0; }
+.micon { width:22px; height:22px; border-radius:50%; background:rgba(13,148,251,.1); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.msep { width:1px; height:13px; background:var(--border); margin:0 4px; }
+.mlink { font-size:12px; font-weight:700; color:var(--blue); text-decoration:underline; cursor:pointer; }
+.mcbtn {
+  padding:3px 12px; border-radius:20px;
+  border:1.5px solid var(--blue); background:transparent;
+  color:var(--blue); font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:11px; font-weight:700; cursor:pointer; transition:all .15s;
+}
+.mcbtn:hover { background:var(--blue); color:var(--white); }
+
+/* ── LAYOUT ── */
+.body { display:flex; flex:1; overflow:hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width:228px; flex-shrink:0;
+  background:var(--navy);
+  display:flex; flex-direction:column;
+  padding:18px 10px; overflow-y:auto;
+}
+.slogo { display:flex; align-items:center; gap:10px; padding:8px 10px; margin-bottom:24px; }
+.slogo-icon {
+  width:32px; height:32px; border-radius:8px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--blue),#38b8ff);
+  display:flex; align-items:center; justify-content:center; font-size:14px;
+}
+.slogo-name { font-size:13px; font-weight:700; color:var(--white); }
+.slogo-sub { font-size:10px; color:rgba(255,255,255,.38); margin-top:1px; }
+.slabel {
+  font-size:9px; font-weight:700; color:rgba(255,255,255,.28);
+  letter-spacing:.14em; text-transform:uppercase;
+  padding:0 10px; margin-bottom:5px; margin-top:4px;
+}
+.ni {
+  display:flex; align-items:center; gap:9px;
+  padding:9px 10px; border-radius:8px;
+  font-size:13px; font-weight:500; color:rgba(255,255,255,.46);
+  cursor:pointer; transition:all .15s; margin-bottom:2px;
+}
+.ni:hover { background:rgba(255,255,255,.07); color:rgba(255,255,255,.8); }
+.ni.on { background:var(--blue); color:var(--white); font-weight:600; }
+.ni-icon { font-size:14px; width:16px; text-align:center; flex-shrink:0; }
+.nbadge { margin-left:auto; font-size:9px; font-weight:700; padding:2px 7px; border-radius:10px; background:rgba(255,255,255,.1); color:rgba(255,255,255,.6); }
+.nbadge.red { background:rgba(229,62,62,.28); color:#fca5a5; }
+.nbadge.grn { background:rgba(0,190,95,.22); color:#6ee7b7; }
+.pw { margin:16px 4px 0; padding:14px; background:rgba(255,255,255,.05); border-radius:9px; border:1px solid rgba(255,255,255,.08); }
+.pw-title { font-size:9px; font-weight:700; color:rgba(255,255,255,.28); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; }
+.ps { display:flex; align-items:center; gap:8px; padding:3px 0; }
+.pd { width:8px; height:8px; border-radius:50%; border:1.5px solid rgba(255,255,255,.18); flex-shrink:0; }
+.pd.done { background:var(--green); border-color:var(--green); }
+.pd.act { background:var(--blue); border-color:var(--blue); box-shadow:0 0 6px rgba(13,148,251,.6); }
+.pd.fail { background:var(--red); border-color:var(--red); }
+.pl { font-size:11px; font-weight:500; color:rgba(255,255,255,.34); }
+.pl.done { color:var(--lgreen); }
+.pl.act { color:#7dd3fc; }
+.pc { width:1.5px; height:7px; background:rgba(255,255,255,.1); margin:0 0 0 3px; }
+
+/* ── MAIN ── */
+.main { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.page { display:none; flex-direction:column; height:100%; overflow:hidden; }
+.page.on { display:flex; }
+
+.phdr { padding:20px 26px 0; flex-shrink:0; background:var(--white); border-bottom:1px solid var(--border); }
+.pey { font-size:10px; font-weight:700; color:var(--blue); letter-spacing:.08em; text-transform:uppercase; margin-bottom:4px; }
+.ptitle { font-size:22px; font-weight:800; color:var(--charcoal); letter-spacing:-.025em; }
+.pdesc { font-size:14px; font-weight:400; color:var(--muted); margin-top:4px; padding-bottom:16px; line-height:1.6; }
+.pbody { flex:1; overflow-y:auto; padding:20px 26px 28px; }
+.pbody::-webkit-scrollbar { width:3px; }
+.pbody::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ── WELCOME ── */
+.wcenter { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; padding:40px; }
+.wbadge { display:inline-flex; align-items:center; gap:6px; padding:5px 14px; border-radius:24px; background:rgba(13,148,251,.07); border:1.5px solid rgba(13,148,251,.18); font-size:11px; font-weight:700; color:var(--blue); letter-spacing:.05em; text-transform:uppercase; margin-bottom:20px; }
+.wh1 { font-size:clamp(26px,4vw,44px); font-weight:800; line-height:1.08; letter-spacing:-.03em; color:var(--charcoal); margin-bottom:14px; max-width:560px; }
+.wh1 em { font-style:normal; color:var(--blue); }
+.wp { font-size:14px; font-weight:400; color:var(--muted); max-width:460px; line-height:1.8; margin-bottom:32px; }
+.wcards { display:flex; gap:10px; margin-bottom:32px; flex-wrap:wrap; justify-content:center; }
+.wcard { background:var(--lgray); border:1px solid var(--border); border-radius:12px; padding:16px 18px; min-width:110px; text-align:left; transition:all .2s; }
+.wcard:hover { box-shadow:var(--sh); transform:translateY(-2px); border-color:var(--blue); }
+.wci { font-size:20px; margin-bottom:7px; }
+.wct { font-size:13px; font-weight:700; color:var(--charcoal); margin-bottom:2px; }
+.wcd { font-size:11px; color:var(--muted); line-height:1.5; }
+.wprow { display:flex; gap:10px; align-items:center; }
+.winput { padding:10px 14px; background:var(--lgray); border:1.5px solid var(--border); border-radius:9px; color:var(--charcoal); font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:600; outline:none; transition:all .15s; width:230px; }
+.winput:focus { border-color:var(--blue); background:var(--white); box-shadow:0 0 0 3px rgba(13,148,251,.1); }
+.btnp { padding:10px 22px; background:var(--navy); color:var(--white); border:none; border-radius:9px; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .15s; box-shadow:0 2px 8px rgba(1,38,82,.2); }
+.btnp:hover { background:var(--slate); box-shadow:var(--sh); }
+
+/* ── DASHBOARD ── */
+.dstats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.sc { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:16px 18px; box-shadow:var(--sh-sm); }
+.sl { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; }
+.sv { font-size:26px; font-weight:800; letter-spacing:-.03em; }
+.ss { font-size:11px; font-weight:400; color:var(--muted2); margin-top:2px; }
+.dacards { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.ac { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:22px; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; box-shadow:var(--sh-sm); }
+.ac:hover { border-color:var(--blue); box-shadow:var(--sh); transform:translateY(-2px); }
+.ac.dis { opacity:.44; cursor:not-allowed; }
+.ac.dis:hover { transform:none; border-color:var(--border); box-shadow:var(--sh-sm); }
+.acn { font-size:10px; font-weight:700; color:var(--muted2); letter-spacing:.08em; margin-bottom:10px; }
+.aci { font-size:26px; margin-bottom:9px; }
+.act { font-size:16px; font-weight:800; color:var(--charcoal); margin-bottom:5px; letter-spacing:-.015em; }
+.acd { font-size:13px; font-weight:400; color:var(--muted); line-height:1.6; }
+.atag { position:absolute; top:14px; right:14px; font-size:9px; font-weight:700; padding:3px 9px; border-radius:20px; letter-spacing:.05em; text-transform:uppercase; }
+.tsim { background:rgba(221,107,32,.08); color:var(--amber); border:1px solid rgba(221,107,32,.2); }
+.tlive { background:rgba(0,190,95,.08); color:var(--green); border:1px solid rgba(0,190,95,.18); }
+.tgate { background:rgba(13,148,251,.08); color:var(--blue); border:1px solid rgba(13,148,251,.18); }
+
+/* ── REGISTER ── */
+.rlayout { display:grid; grid-template-columns:330px 1fr; gap:14px; align-items:start; }
+.fcard { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:var(--sh-sm); }
+.ftitle { font-size:14px; font-weight:700; color:var(--charcoal); margin-bottom:14px; padding-bottom:11px; border-bottom:1px solid var(--border2); }
+.field { margin-bottom:12px; }
+.field label { display:block; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-bottom:5px; }
+.field input, .field textarea { width:100%; padding:9px 12px; background:var(--lgray); border:1.5px solid var(--border); border-radius:8px; color:var(--charcoal); font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:400; outline:none; transition:all .15s; resize:none; }
+.field input:focus, .field textarea:focus { border-color:var(--blue); background:var(--white); box-shadow:0 0 0 3px rgba(13,148,251,.08); }
+.hbox { padding:9px 12px; background:var(--lgray); border:1.5px solid var(--border2); border-radius:8px; font-size:10px; font-weight:400; color:var(--muted); word-break:break-all; min-height:36px; line-height:1.5; margin-bottom:12px; font-family:'Plus Jakarta Sans',monospace; transition:all .2s; }
+.hbox.on { color:var(--blue); border-color:rgba(13,148,251,.3); background:rgba(13,148,251,.04); }
+.btnr { width:100%; padding:11px; background:var(--navy); color:var(--white); border:none; border-radius:8px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; box-shadow:0 2px 7px rgba(1,38,82,.2); }
+.btnr:hover { background:var(--slate); }
+.btnr:disabled { opacity:.48; cursor:not-allowed; }
+
+/* ── CHAIN PANEL ── */
+.cpanel { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:var(--sh-sm); display:flex; flex-direction:column; max-height:calc(100vh - 195px); overflow:hidden; }
+.cphdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; flex-shrink:0; }
+.cptitle { font-size:13px; font-weight:700; color:var(--charcoal); }
+.cpcount { font-size:10px; font-weight:700; padding:2px 9px; border-radius:20px; background:rgba(13,148,251,.08); color:var(--blue); border:1px solid rgba(13,148,251,.15); }
+.cpsub { font-size:11px; color:var(--muted); margin-bottom:14px; flex-shrink:0; }
+.cscroll { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:7px; }
+.cscroll::-webkit-scrollbar { width:3px; }
+.cscroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.brow { display:flex; align-items:stretch; }
+.bspine { display:flex; flex-direction:column; align-items:center; width:22px; flex-shrink:0; padding-top:12px; }
+.bdot { width:9px; height:9px; border-radius:50%; border:2px solid var(--border); background:var(--sgray); flex-shrink:0; transition:all .3s; }
+.bdot.clean { background:var(--green); border-color:var(--green); }
+.bdot.tamp { background:var(--red); border-color:var(--red); }
+.bdot.verd { background:var(--green); border-color:var(--green); }
+.bline { flex:1; width:2px; background:var(--border2); margin-top:2px; }
+.btile { flex:1; background:var(--lgray); border:1px solid var(--border); border-radius:9px; padding:10px 13px; cursor:pointer; transition:all .2s; }
+.btile:hover { border-color:var(--blue); background:var(--white); box-shadow:var(--sh-sm); }
+.btile.t { background:var(--red-dim); border-color:var(--red-bdr); }
+.btile.v { background:rgba(0,190,95,.06); border-color:rgba(0,190,95,.22); }
+.btile.n { background:rgba(13,148,251,.06); border-color:rgba(13,148,251,.22); animation:tin .4s ease; }
+@keyframes tin { from{opacity:0;transform:translateY(-7px) scale(.97)} to{opacity:1;transform:none} }
+.btop { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.bnum { font-size:9px; font-weight:500; color:var(--muted2); }
+.bstat { font-size:9px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.bs-c { background:rgba(0,190,95,.1); color:var(--green); }
+.bs-t { background:var(--red-dim); color:var(--red); }
+.bs-v { background:rgba(0,190,95,.1); color:var(--green); }
+.bs-p { background:rgba(13,148,251,.08); color:var(--blue); }
+.bs-o { background:rgba(13,148,251,.08); color:var(--blue); }
+.bname { font-size:13px; font-weight:700; color:var(--charcoal); margin-bottom:1px; }
+.bver { font-size:11px; font-weight:400; color:var(--muted); margin-bottom:4px; }
+.bhash { font-size:9px; color:var(--muted2); word-break:break-all; font-family:'Plus Jakarta Sans',monospace; }
+
+/* ── SHIP ── */
+.vtable { background:var(--white); border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:var(--sh-sm); }
+.vthdr { display:grid; grid-template-columns:190px 1fr 1fr 130px; gap:10px; padding:10px 18px; border-bottom:1px solid var(--border); background:var(--lgray); font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+.vrow { display:grid; grid-template-columns:190px 1fr 1fr 130px; gap:10px; padding:12px 18px; border-bottom:1px solid var(--border2); align-items:center; transition:all .3s; }
+.vrow:last-child { border-bottom:none; }
+.vrow.chk { background:rgba(13,148,251,.05); }
+.vrow.ok { background:rgba(0,190,95,.05); }
+.vrow.bad { background:var(--red-dim); }
+.vname { font-size:14px; font-weight:700; color:var(--charcoal); }
+.vver { font-size:12px; font-weight:400; color:var(--muted); }
+.vhash { font-size:9px; color:var(--muted2); font-family:'Plus Jakarta Sans',monospace; word-break:break-all; }
+.vstatus { font-size:11px; font-weight:700; text-align:right; }
+.vstatus.p { color:var(--muted2); }
+.vstatus.c { color:var(--blue); }
+.vstatus.y { color:var(--green); }
+.vstatus.n { color:var(--red); }
+.svrdict { margin-top:14px; padding:20px 22px; border-radius:12px; display:none; animation:fup .4s ease; box-shadow:var(--sh-sm); }
+@keyframes fup { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:none} }
+.svrdict.blocked { background:var(--red-dim); border:1.5px solid var(--red-bdr); }
+.svrdict.cleared { background:rgba(0,190,95,.06); border:1.5px solid rgba(0,190,95,.22); }
+.svtop { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+.svico { font-size:26px; }
+.svtitle { font-size:18px; font-weight:800; color:var(--charcoal); letter-spacing:-.02em; }
+.svmsg { font-size:13px; font-weight:400; color:var(--muted); line-height:1.7; margin-bottom:14px; }
+.svacts { display:flex; gap:8px; }
+.btnsv { padding:8px 18px; border-radius:8px; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; border:1.5px solid var(--border); background:var(--white); color:var(--charcoal); }
+.btnsv:hover { border-color:var(--charcoal); }
+.btnsv.g { background:var(--green); color:var(--white); border-color:var(--green); }
+.btnsv.g:hover { background:#00a552; }
+
+/* ── INDIVIDUAL ── */
+.icard { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:22px; max-width:460px; margin-bottom:18px; box-shadow:var(--sh-sm); }
+.ires { max-width:460px; padding:16px 18px; border-radius:11px; display:none; animation:fup .3s ease; box-shadow:var(--sh-sm); }
+.ires.ok { background:rgba(0,190,95,.06); border:1.5px solid rgba(0,190,95,.22); }
+.ires.bad { background:var(--red-dim); border:1.5px solid var(--red-bdr); }
+.ires.info { background:rgba(13,148,251,.06); border:1.5px solid rgba(13,148,251,.18); }
+.irt { font-size:14px; font-weight:700; color:var(--charcoal); margin-bottom:7px; }
+.ird { font-size:13px; font-weight:400; color:var(--muted); line-height:1.7; }
+.ird span { display:block; margin-bottom:2px; }
+.ird .hl { color:var(--blue); font-size:10px; word-break:break-all; font-family:'Plus Jakarta Sans',monospace; }
+
+/* ── CLEARED ── */
+.clwrap { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; padding:40px; }
+.clcheck { width:72px; height:72px; border-radius:50%; background:rgba(0,190,95,.1); border:2.5px solid var(--green); display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:18px; animation:pop .5s cubic-bezier(.175,.885,.32,1.275); box-shadow:0 0 0 10px rgba(0,190,95,.06); }
+@keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+.cltitle { font-size:24px; font-weight:800; color:var(--green); margin-bottom:7px; letter-spacing:-.025em; }
+.clsub { font-size:13px; font-weight:400; color:var(--muted); max-width:440px; line-height:1.8; margin-bottom:24px; }
+.metrics { display:flex; gap:10px; margin-bottom:24px; }
+.mbox { background:var(--lgray); border:1px solid var(--border); border-radius:12px; padding:14px 24px; text-align:center; box-shadow:var(--sh-sm); }
+.mval { font-size:28px; font-weight:800; color:var(--green); letter-spacing:-.03em; }
+.mlbl { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
+.nsbox { background:var(--lgray); border:1px solid var(--border); border-radius:12px; padding:18px 22px; text-align:left; width:100%; max-width:500px; margin-bottom:22px; box-shadow:var(--sh-sm); }
+.nstitle { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px; }
+.nsitem { display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--border2); }
+.nsitem:last-child { border-bottom:none; }
+.nsnum { width:20px; height:20px; border-radius:5px; background:rgba(13,148,251,.08); border:1px solid rgba(13,148,251,.18); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:var(--blue); flex-shrink:0; margin-top:1px; }
+.nstxt { font-size:12px; font-weight:400; line-height:1.6; color:var(--muted); }
+.nstxt strong { font-weight:700; color:var(--charcoal); display:block; margin-bottom:1px; }
+
+/* ── OVERLAYS ── */
+.overlay { position:fixed; inset:0; background:rgba(1,38,82,.54); backdrop-filter:blur(8px); z-index:50; display:none; align-items:center; justify-content:center; }
+.overlay.on { display:flex; }
+.obox { background:var(--white); border:1px solid var(--border); border-radius:18px; padding:36px; text-align:center; max-width:390px; width:calc(100% - 48px); box-shadow:var(--sh-lg); }
+.oico { font-size:44px; margin-bottom:14px; }
+.otitle { font-size:20px; font-weight:800; color:var(--charcoal); margin-bottom:7px; letter-spacing:-.025em; }
+.odesc { font-size:13px; font-weight:400; color:var(--muted); line-height:1.7; margin-bottom:22px; }
+.oprog { font-size:12px; font-weight:500; color:var(--blue); margin-top:12px; min-height:16px; }
+.btncon { width:100%; padding:13px; background:var(--navy); color:var(--white); border:none; border-radius:10px; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all .15s; box-shadow:0 3px 12px rgba(1,38,82,.22); }
+.btncon:hover { background:var(--slate); }
+.btncon:disabled { opacity:.48; cursor:not-allowed; }
+.moverlay { position:fixed; inset:0; background:rgba(1,38,82,.44); backdrop-filter:blur(4px); z-index:100; display:none; align-items:center; justify-content:center; padding:22px; }
+.moverlay.on { display:flex; }
+.modal { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:26px; width:100%; max-width:410px; box-shadow:var(--sh-lg); }
+.mtitle { font-size:15px; font-weight:800; color:var(--charcoal); margin-bottom:5px; }
+.mwarn { font-size:12px; color:var(--red); padding:9px 13px; background:var(--red-dim); border:1px solid var(--red-bdr); border-radius:7px; margin-bottom:16px; line-height:1.6; }
+.mbtns { display:flex; gap:9px; margin-top:14px; }
+.btncancel { flex:1; padding:9px; border:1.5px solid var(--border); border-radius:7px; background:var(--white); color:var(--charcoal); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; }
+.btncancel:hover { border-color:var(--charcoal); }
+.btntamp { flex:1; padding:9px; background:var(--red); color:var(--white); border:none; border-radius:7px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; }
+.btntamp:hover { background:#c53030; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(66px); background:var(--charcoal); color:var(--white); padding:9px 20px; border-radius:9px; font-size:12px; font-weight:500; z-index:200; transition:transform .3s ease; white-space:nowrap; box-shadow:var(--sh-lg); }
+.toast.on { transform:translateX(-50%) translateY(0); }
+
+.spin { display:inline-block; width:10px; height:10px; border:1.5px solid rgba(0,0,0,.1); border-top-color:currentColor; border-radius:50%; animation:spin .5s linear infinite; vertical-align:middle; margin-right:5px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tl">
+    <div class="gpay"><span class="g1">G</span><span class="g2">o</span><span class="g3">o</span><span class="g4">g</span><span class="g5">l</span><span class="g6">e</span><span class="gp"> Pay</span></div>
+    <div class="tsep"></div>
+    <div class="ttl">SBOM Integrity Gateway</div>
+  </div>
+  <div class="tr">
+    <div class="npill"><span class="ndot" id="ndot"></span><span id="nlabel">No network</span></div>
+    <button class="wbtn" id="wbtn" onclick="connectWallet()"><span id="wlabel">🦊 Connect Wallet</span></button>
+  </div>
+</div>
+
+<!-- MODE BANNER -->
+<div id="mbanner" class="mbanner"></div>
+
+<div class="body">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="slogo">
+    <div class="slogo-icon">🔐</div>
+    <div><div class="slogo-name">SBOM Gateway</div><div class="slogo-sub">Ethereum · Sepolia</div></div>
+  </div>
+  <div class="slabel">Navigation</div>
+  <div class="ni on" id="n-welcome" onclick="go('welcome')"><span class="ni-icon">🏠</span>Welcome</div>
+  <div class="ni" id="n-dashboard" onclick="go('dashboard')"><span class="ni-icon">⚡</span>Dashboard</div>
+  <div class="slabel" style="margin-top:14px">Pipeline</div>
+  <div class="ni" id="n-register" onclick="go('register')"><span class="ni-icon">🔐</span>Register SBOM<span class="nbadge" id="bb">0</span></div>
+  <div class="ni" id="n-ship" onclick="go('ship')"><span class="ni-icon">🚀</span>Start Shipping<span class="nbadge" id="bship">Gate</span></div>
+  <div class="ni" id="n-individual" onclick="go('individual')"><span class="ni-icon">🔍</span>Verify Component</div>
+  <div class="pw">
+    <div class="pw-title">Pipeline Status</div>
+    <div class="ps"><div class="pd done"></div><span class="pl done">Init</span></div><div class="pc"></div>
+    <div class="ps"><div class="pd done"></div><span class="pl done">Build</span></div><div class="pc"></div>
+    <div class="ps"><div class="pd act" id="p-reg"></div><span class="pl act" id="pl-reg">Register</span></div><div class="pc"></div>
+    <div class="ps"><div class="pd" id="p-ver"></div><span class="pl" id="pl-ver">Verify</span></div><div class="pc"></div>
+    <div class="ps"><div class="pd" id="p-ship"></div><span class="pl" id="pl-ship">Ship</span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- WELCOME -->
+<div class="page on" id="page-welcome">
+  <div class="pbody" style="background:var(--white);display:flex;flex-direction:column;justify-content:center;">
+    <div class="wcenter">
+      <div class="wbadge">⚡ SBOM Integrity Gateway · Powered by Ethereum</div>
+      <h1 class="wh1">Supply Chain Security<br>for <em>Google Pay</em></h1>
+      <p class="wp">Every component in Google Pay's build pipeline is SHA256-hashed and registered on Ethereum. Before shipping, all hashes are verified — any tampered component blocks the release.</p>
+      <div class="wcards">
+        <div class="wcard"><div class="wci">🔐</div><div class="wct">Register</div><div class="wcd">Hash components on-chain</div></div>
+        <div class="wcard"><div class="wci">🛡️</div><div class="wct">Verify</div><div class="wcd">Detect tampering instantly</div></div>
+        <div class="wcard"><div class="wci">🚀</div><div class="wct">Ship</div><div class="wcd">Gate deployment safely</div></div>
+        <div class="wcard"><div class="wci">📋</div><div class="wct">Audit</div><div class="wcd">Immutable on-chain trail</div></div>
+      </div>
+      <div class="wprow">
+        <input class="winput" id="proj-input" value="Google Pay v14.2.1"/>
+        <button class="btnp" onclick="startPipeline()">Initialize Pipeline →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="page-dashboard">
+  <div class="phdr">
+    <div class="pey">Overview</div>
+    <div class="ptitle" id="dash-title">Google Pay v14.2.1</div>
+    <div class="pdesc">CI/CD pipeline with blockchain-based SBOM integrity verification.</div>
+  </div>
+  <div class="pbody">
+    <div class="dstats">
+      <div class="sc"><div class="sl">Components</div><div class="sv" id="ds-c" style="color:var(--blue)">0</div><div class="ss">Registered on-chain</div></div>
+      <div class="sc"><div class="sl">Tampered</div><div class="sv" id="ds-t" style="color:var(--red)">0</div><div class="ss">Hash mismatches</div></div>
+      <div class="sc"><div class="sl">Verified</div><div class="sv" id="ds-v" style="color:var(--green)">0</div><div class="ss">Clean components</div></div>
+      <div class="sc"><div class="sl">Network</div><div class="sv" style="font-size:14px;color:var(--muted);margin-top:6px">Sepolia</div><div class="ss">Ethereum testnet</div></div>
+    </div>
+    <div class="dacards">
+      <div class="ac dis" onclick="toast('✓ Build simulated — 7 components compiled')"><div class="acn">01</div><div class="aci">🏗️</div><div class="act">Build Product</div><div class="acd">Compile source code and generate build artifacts for all Google Pay modules.</div><span class="atag tsim">Simulated</span></div>
+      <div class="ac" onclick="go('register')"><div class="acn">02</div><div class="aci">🔐</div><div class="act">Register SBOM</div><div class="acd">Hash each component and register its integrity fingerprint on the Ethereum blockchain.</div><span class="atag tlive">Live · On-chain</span></div>
+      <div class="ac" onclick="go('ship')"><div class="acn">03</div><div class="aci">🚀</div><div class="act">Start Shipping</div><div class="acd">Verify all SBOM hashes against blockchain records. Tampered components block deployment.</div><span class="atag tgate">Gateway</span></div>
+      <div class="ac" onclick="go('individual')"><div class="acn">04</div><div class="aci">🔍</div><div class="act">Verify Component</div><div class="acd">Enter any component name to audit its integrity against its on-chain hash record.</div><span class="atag tlive">Live · On-chain</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="page" id="page-register">
+  <div class="phdr">
+    <div class="pey">Pipeline · Step 02</div>
+    <div class="ptitle">Register SBOM</div>
+    <div class="pdesc">Add a new component. Hash is auto-generated. Click any block to simulate tampering.</div>
+  </div>
+  <div class="pbody">
+    <div class="rlayout">
+      <div>
+        <div class="fcard">
+          <div class="ftitle">New Component</div>
+          <div class="field"><label>Component Name</label><input id="cn" placeholder="e.g. bouncycastle" oninput="liveHash()"/></div>
+          <div class="field"><label>Version</label><input id="cv" placeholder="e.g. 1.70" oninput="liveHash()"/></div>
+          <div class="field"><label>Description</label><textarea id="cd" rows="2" placeholder="e.g. Cryptographic library for PIN encryption" oninput="liveHash()"></textarea></div>
+          <div class="field"><label>SHA256 Hash (auto-generated)</label><div class="hbox" id="live-hash">Fill in fields above...</div></div>
+          <button class="btnr" id="btn-add" onclick="addBlock()">Register on Blockchain →</button>
+        </div>
+      </div>
+      <div class="cpanel">
+        <div class="cphdr"><div class="cptitle">Blockchain Ledger</div><div class="cpcount" id="ccount">0 blocks</div></div>
+        <div class="cpsub">Ethereum Sepolia · Click any block to simulate tampering</div>
+        <div class="cscroll" id="cscroll"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHIP -->
+<div class="page" id="page-ship">
+  <div class="phdr">
+    <div class="pey">Pipeline · Step 03</div>
+    <div class="ptitle">Start Shipping</div>
+    <div class="pdesc">Before Google Pay ships to production, all SBOM hashes must pass integrity verification.</div>
+  </div>
+  <div class="pbody">
+
+    <!-- Intro screen (shown first) -->
+    <div id="ship-intro">
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:32px;max-width:600px;box-shadow:var(--sh-sm);">
+        <div style="font-size:32px;margin-bottom:16px;">🚀</div>
+        <div style="font-size:18px;font-weight:800;color:var(--charcoal);letter-spacing:-.02em;margin-bottom:10px;">Ready to ship Google Pay?</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:24px;">Before deployment, the system will verify every registered component against its on-chain hash record. Any mismatch will block the release automatically.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--lgray);border-radius:10px;border:1px solid var(--border);">
+            <span style="font-size:18px;">🔍</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--charcoal);">Hash Verification</div>
+              <div style="font-size:12px;color:var(--muted);">Each component re-hashed and compared against blockchain record</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--lgray);border-radius:10px;border:1px solid var(--border);">
+            <span style="font-size:18px;">⛓️</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--charcoal);">On-chain Comparison</div>
+              <div style="font-size:12px;color:var(--muted);">Hashes compared against immutable Ethereum Sepolia records</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--lgray);border-radius:10px;border:1px solid var(--border);">
+            <span style="font-size:18px;">🚨</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--charcoal);">Tamper Detection</div>
+              <div style="font-size:12px;color:var(--muted);">Any mismatch fires a TamperDetected event and blocks deployment</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(13,148,251,.06);border-radius:10px;border:1px solid rgba(13,148,251,.18);margin-bottom:24px;">
+          <span style="font-size:16px;">📦</span>
+          <div style="font-size:13px;color:var(--slate);">Verifying <strong id="ship-count" style="color:var(--blue)">0</strong> registered components</div>
+        </div>
+        <button class="btnp" style="width:100%;padding:14px;font-size:15px;" onclick="startVerification()">Start Verification →</button>
+      </div>
+    </div>
+
+    <!-- Results screen (shown after clicking Start) -->
+    <div id="ship-results" style="display:none;">
+      <div class="vtable">
+        <div class="vthdr"><div>Component</div><div>Version</div><div>On-chain Hash</div><div style="text-align:right">Status</div></div>
+        <div id="vrows"></div>
+      </div>
+      <div class="svrdict" id="svrdict"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INDIVIDUAL -->
+<div class="page" id="page-individual">
+  <div class="phdr">
+    <div class="pey">Pipeline · Step 04</div>
+    <div class="ptitle">Verify Component</div>
+    <div class="pdesc">Enter the exact component name to audit its integrity against the blockchain record.</div>
+  </div>
+  <div class="pbody">
+    <div class="icard">
+      <div class="ftitle">Component Lookup</div>
+      <div class="field"><label>Component Name</label><input id="ind-n" placeholder="e.g. bouncycastle"/></div>
+      <div class="field"><label>Version</label><input id="ind-v" placeholder="e.g. 1.70"/></div>
+      <button class="btnr" onclick="verifyInd()" style="margin-top:4px">Verify Integrity →</button>
+    </div>
+    <div class="ires" id="ires"></div>
+    <div style="margin-top:20px;">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;">Registered Components — click to autofill</div>
+      <div id="hints" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLEARED -->
+<div class="page" id="page-cleared">
+  <div class="pbody" style="background:var(--white);display:flex;flex-direction:column;justify-content:center;">
+    <div class="clwrap">
+      <div class="clcheck">✓</div>
+      <div class="cltitle">Deployment Cleared</div>
+      <p class="clsub">All SBOM integrity checks passed. Every component hash matches its on-chain record. Google Pay is cleared for production deployment.</p>
+      <div class="metrics">
+        <div class="mbox"><div class="mval" id="cl-cnt">0</div><div class="mlbl">Verified</div></div>
+        <div class="mbox"><div class="mval">0</div><div class="mlbl">Threats</div></div>
+        <div class="mbox"><div class="mval">100%</div><div class="mlbl">Integrity</div></div>
+      </div>
+      <div class="nsbox">
+        <div class="nstitle">Next Steps in Pipeline</div>
+        <div class="nsitem"><div class="nsnum">1</div><div class="nstxt"><strong>Push to Production Registry</strong>Deploy verified build to Google Play Store and App Store pipelines.</div></div>
+        <div class="nsitem"><div class="nsnum">2</div><div class="nstxt"><strong>Notify Security Team</strong>Automated SBOM report with Etherscan links sent to AppSec team.</div></div>
+        <div class="nsitem"><div class="nsnum">3</div><div class="nstxt"><strong>Monitor Runtime Integrity</strong>Continuous hash verification — any deviation triggers automatic rollback.</div></div>
+        <div class="nsitem"><div class="nsnum">4</div><div class="nstxt"><strong>Archive SBOM On-chain</strong>Final SBOM snapshot permanently archived for compliance and audit trail.</div></div>
+      </div>
+      <button class="btnp" onclick="go('dashboard')">← Back to Dashboard</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /body -->
+</div><!-- /app -->
+
+<!-- CONNECT OVERLAY -->
+<div class="overlay" id="conn-overlay">
+  <div class="obox">
+    <div class="oico">🦊</div>
+    <div class="otitle">Connect MetaMask</div>
+    <div class="odesc">Connect your wallet to register and verify components on Ethereum Sepolia. After connecting, all 7 Google Pay components will be automatically registered on-chain.</div>
+    <button class="btncon" id="btn-conn" onclick="connectWallet()">Connect MetaMask</button>
+    <div class="oprog" id="conn-prog"></div>
+  </div>
+</div>
+
+<!-- TAMPER MODAL -->
+<div class="moverlay" id="tamp-overlay">
+  <div class="modal">
+    <div class="mtitle">⚠️ Simulate Tampering</div>
+    <div class="mwarn">You are simulating a hacker modifying this component on the build server. The blockchain record stays unchanged — only the local file changes. This will be detected during verification.</div>
+    <div class="field"><label>Current Description</label><input id="m-cur" readonly style="opacity:.6"/></div>
+    <div class="field"><label>New Description (tampered)</label><textarea id="m-new" rows="3" placeholder="e.g. Cryptographic library + keylogger payload"></textarea></div>
+    <div class="mbtns">
+      <button class="btncancel" onclick="closeModal()">Cancel</button>
+      <button class="btntamp" onclick="doTamper()">Apply Tamper</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="tst"></div>
+
+<script>
+const CA="0x9B5A0D5d0C81A584653866cDa0A91ECCdB551fDd";
+const ABI=["function registerComponent(string,string,bytes32) public","function verifyComponent(string,string,bytes32) public returns(string)","function getComponent(string,string) public view returns(bytes32,address,uint256)"];
+const GPAY=[
+  {name:'bouncycastle',ver:'1.70',desc:'Cryptographic library for PIN encryption',ico:'🔐'},
+  {name:'okhttp',ver:'4.10.0',desc:'HTTP networking layer for payment requests',ico:'🌐'},
+  {name:'retrofit',ver:'2.9.0',desc:'REST API communication framework',ico:'📡'},
+  {name:'sqlite',ver:'3.39.0',desc:'Local transaction history storage',ico:'💾'},
+  {name:'protobuf',ver:'3.21.0',desc:'Data serialization for transaction objects',ico:'📦'},
+  {name:'firebase-auth',ver:'22.1.0',desc:'User authentication and session management',ico:'🔑'},
+  {name:'conscrypt',ver:'2.5.2',desc:'SSL/TLS security for encrypted communication',ico:'🛡️'},
+];
+let prov,sgn,ctr,blks=[],eidx=null,wcon=false;
+const hasMM=!!window.ethereum;
+
+async function h256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return'0x'+Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+function b32(h){return h.padEnd(66,'0');}
+
+function banner(){
+  const el=document.getElementById('mbanner');if(!el)return;
+  if(wcon){el.className='mbanner live';el.innerHTML='<span class="mlivdot"></span>&nbsp;<strong>Live Mode</strong>&nbsp;<span style="color:var(--muted)">— Real transactions on Ethereum Sepolia</span>';}
+  else if(!hasMM){el.className='mbanner';el.innerHTML='<span class="micon">🎮</span><strong>Demo Mode</strong>&nbsp;<span style="color:var(--muted)">— Fully interactive simulation, no wallet needed</span><span class="msep"></span><a href="https://metamask.io" target="_blank" class="mlink">Install MetaMask</a><span style="color:var(--muted)">&nbsp;for live blockchain</span>';}
+  else{el.className='mbanner';el.innerHTML='<span class="micon">🎮</span><strong>Demo Mode</strong>&nbsp;<span style="color:var(--muted)">— MetaMask detected but not connected</span><span class="msep"></span><button class="mcbtn" onclick="document.getElementById(\'conn-overlay\').classList.add(\'on\')">Connect for Live Mode →</button>';}
+}
+
+async function demoLoad(){
+  for(const c of GPAY){const h=await h256(c.name+c.ver+c.desc);blks.push({...c,oh:h,ch:h,tamp:false,ver2:false,oc:false});}
+  render();stats();hints();document.getElementById('bb').textContent=blks.length;
+}
+
+function go(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('on'));
+  document.getElementById('page-'+p).classList.add('on');
+  const n=document.getElementById('n-'+p);if(n)n.classList.add('on');
+  if(p==='ship'){
+    document.getElementById('ship-intro').style.display='block';
+    document.getElementById('ship-results').style.display='none';
+    document.getElementById('ship-count').textContent=blks.length;
+    document.getElementById('svrdict').style.display='none';
+  }
+  if(p==='individual')hints();
+}
+
+function startPipeline(){
+  const nm=document.getElementById('proj-input').value.trim()||'Google Pay';
+  document.getElementById('dash-title').textContent=nm;
+  go('dashboard');
+  if(hasMM&&!wcon)document.getElementById('conn-overlay').classList.add('on');
+}
+
+async function connectWallet(){
+  const btn=document.getElementById('btn-conn'),prog=document.getElementById('conn-prog');
+  if(!window.ethereum){prog.textContent='❌ MetaMask not found.';return;}
+  btn.disabled=true;btn.textContent='Connecting...';
+  try{
+    prov=new ethers.BrowserProvider(window.ethereum);
+    await prov.send('eth_requestAccounts',[]);
+    sgn=await prov.getSigner();
+    ctr=new ethers.Contract(CA,ABI,sgn);
+    const addr=await sgn.getAddress();const sh=addr.slice(0,6)+'...'+addr.slice(-4);
+    wcon=true;
+    document.getElementById('wbtn').classList.add('on');
+    document.getElementById('wlabel').textContent='✓ '+sh;
+    document.getElementById('ndot').classList.add('on');
+    document.getElementById('nlabel').textContent='Sepolia · '+sh;
+    document.getElementById('conn-overlay').classList.remove('on');
+    banner();blks=[];await regAll();
+  }catch(e){prog.textContent='❌ '+(e.message||'Failed').slice(0,60);btn.disabled=false;btn.textContent='Connect MetaMask';}
+}
+
+async function regAll(){
+  toast('Registering 7 components on-chain...');
+  for(let i=0;i<GPAY.length;i++){
+    const c=GPAY[i];const h=await h256(c.name+c.ver+c.desc);
+    toast(`Registering ${i+1}/7: ${c.name}...`);
+    try{const tx=await ctr.registerComponent(c.name,c.ver,b32(h));await tx.wait();blks.push({...c,oh:h,ch:h,tamp:false,ver2:false,oc:true});}
+    catch(e){blks.push({...c,oh:h,ch:h,tamp:false,ver2:false,oc:!!(e.reason&&e.reason.includes('already'))});}
+    render();stats();hints();
+  }
+  toast(`✓ All ${blks.length} components registered`);document.getElementById('bb').textContent=blks.length;
+}
+
+async function liveHash(){
+  const n=document.getElementById('cn').value,v=document.getElementById('cv').value,d=document.getElementById('cd').value;
+  const box=document.getElementById('live-hash');
+  if(!n&&!v&&!d){box.textContent='Fill in fields above...';box.classList.remove('on');return;}
+  box.textContent=await h256(n+v+d);box.classList.add('on');
+}
+
+async function addBlock(){
+  const n=document.getElementById('cn').value.trim(),v=document.getElementById('cv').value.trim(),d=document.getElementById('cd').value.trim();
+  if(!n||!v||!d){toast('Fill in all fields');return;}
+  const btn=document.getElementById('btn-add');btn.disabled=true;
+  const clr=()=>{document.getElementById('cn').value='';document.getElementById('cv').value='';document.getElementById('cd').value='';document.getElementById('live-hash').textContent='Fill in fields above...';document.getElementById('live-hash').classList.remove('on');};
+  if(!wcon){
+    btn.innerHTML='<span class="spin"></span>Simulating...';
+    await new Promise(r=>setTimeout(r,1100));
+    const h=await h256(n+v+d);blks.push({name:n,ver:v,desc:d,ico:'🆕',oh:h,ch:h,tamp:false,ver2:false,oc:false,isNew:true});
+    clr();render();stats();hints();toast(`✓ ${n} v${v} registered (Demo)`);
+    btn.disabled=false;btn.textContent='Register on Blockchain →';return;
+  }
+  btn.innerHTML='<span class="spin"></span>Broadcasting...';
+  try{
+    const h=await h256(n+v+d);const tx=await ctr.registerComponent(n,v,b32(h));
+    toast('Waiting for confirmation...');await tx.wait();
+    blks.push({name:n,ver:v,desc:d,ico:'🆕',oh:h,ch:h,tamp:false,ver2:false,oc:true,isNew:true});
+    clr();render();stats();hints();toast(`✓ ${n} v${v} on Ethereum Sepolia`);
+  }catch(e){toast('Error: '+(e.reason||e.message||'failed').slice(0,50));}
+  btn.disabled=false;btn.textContent='Register on Blockchain →';
+}
+
+function render(){
+  const s=document.getElementById('cscroll');s.innerHTML='';
+  document.getElementById('ccount').textContent=`${blks.length} blocks`;
+  document.getElementById('bb').textContent=blks.length;
+  blks.forEach((b,i)=>{
+    const row=document.createElement('div');row.className='brow';
+    const dc=b.tamp?'tamp':b.ver2?'verd':b.oc?'clean':'';
+    const tc=b.tamp?' t':b.ver2?' v':b.isNew?' n':'';
+    const st=b.tamp?'<span class="bstat bs-t">⚠ Tampered</span>':b.ver2?'<span class="bstat bs-v">✓ Verified</span>':b.oc?'<span class="bstat bs-o">On-chain</span>':'<span class="bstat bs-p">Simulated</span>';
+    row.innerHTML=`<div class="bspine"><div class="bdot ${dc}"></div>${i<blks.length-1?'<div class="bline"></div>':''}</div><div class="btile${tc}" onclick="openModal(${i})"><div class="btop"><span class="bnum">Block #${String(i).padStart(4,'0')} · ${b.ico||'📦'}</span>${st}</div><div class="bname">${b.name}</div><div class="bver">v${b.ver}</div><div class="bhash">${b.ch.slice(0,48)}...</div></div>`;
+    s.appendChild(row);
+  });
+  s.scrollTop=s.scrollHeight;
+}
+
+function openModal(i){eidx=i;document.getElementById('m-cur').value=blks[i].desc;document.getElementById('m-new').value='';document.getElementById('tamp-overlay').classList.add('on');}
+function closeModal(){document.getElementById('tamp-overlay').classList.remove('on');eidx=null;}
+async function doTamper(){
+  if(eidx===null)return;
+  const nd=document.getElementById('m-new').value.trim();if(!nd){toast('Enter a new description');return;}
+  const b=blks[eidx];b.desc=nd;b.ch=await h256(b.name+b.ver+nd);b.tamp=true;b.ver2=false;
+  closeModal();render();stats();toast(`⚠️ ${b.name} tampered — blockchain record unchanged`);
+}
+
+function startVerification(){
+  document.getElementById('ship-intro').style.display='none';
+  document.getElementById('ship-results').style.display='block';
+  runShip();
+}
+
+async function runShip(){
+  const rows=document.getElementById('vrows'),vrd=document.getElementById('svrdict');
+  rows.innerHTML='';vrd.style.display='none';blks.forEach(b=>{b.ver2=false;});
+  const els=blks.map((b,i)=>{const d=document.createElement('div');d.className='vrow';d.id=`vr${i}`;d.innerHTML=`<div><div class="vname">${b.ico||'📦'} ${b.name}</div></div><div class="vver">v${b.ver}</div><div class="vhash">${b.oh.slice(0,30)}...</div><div class="vstatus p" id="vs${i}">—</div>`;rows.appendChild(d);return d;});
+  let bad=false;
+  for(let i=0;i<blks.length;i++){
+    await new Promise(r=>setTimeout(r,260));els[i].classList.add('chk');
+    document.getElementById(`vs${i}`).className='vstatus c';document.getElementById(`vs${i}`).innerHTML='<span class="spin"></span>Checking';
+    await new Promise(r=>setTimeout(r,460));
+    let ok=false;
+    try{if(wcon&&blks[i].oc){const r=await ctr.verifyComponent.staticCall(blks[i].name,blks[i].ver,b32(blks[i].ch));ok=r.includes('VERIFIED');}else{ok=blks[i].oh===blks[i].ch;}}catch(e){ok=blks[i].oh===blks[i].ch;}
+    if(!ok)bad=true;blks[i].ver2=!blks[i].tamp;
+    els[i].classList.remove('chk');els[i].classList.add(ok?'ok':'bad');
+    document.getElementById(`vs${i}`).className=`vstatus ${ok?'y':'n'}`;document.getElementById(`vs${i}`).textContent=ok?'✓ Verified':'✗ Tampered';
+  }
+  render();stats();await new Promise(r=>setTimeout(r,380));vrd.style.display='block';
+  const dn=wcon?'':`<div style="margin-top:10px;font-size:11px;font-weight:600;color:var(--blue)">⚡ Demo Mode — <button class="mcbtn" onclick="document.getElementById('conn-overlay').classList.add('on')">Connect MetaMask</button> for real on-chain verification</div>`;
+  if(bad){
+    vrd.className='svrdict blocked';
+    vrd.innerHTML=`<div class="svtop"><div class="svico">🚨</div><div class="svtitle">Deployment Blocked</div></div><div class="svmsg">One or more components have been tampered with. Hash mismatch detected against blockchain records. Google Pay cannot ship until all components pass integrity verification.</div>${dn}<div class="svacts" style="margin-top:12px"><button class="btnsv" onclick="go('register')">← Review Components</button></div>`;
+    document.getElementById('bship').textContent='Blocked';document.getElementById('bship').className='nbadge red';
+    pip('ver','fail');pip('ship','fail');
+  }else{
+    document.getElementById('cl-cnt').textContent=blks.length;
+    vrd.className='svrdict cleared';
+    vrd.innerHTML=`<div class="svtop"><div class="svico">✅</div><div class="svtitle">All Clear — Ready to Ship</div></div><div class="svmsg">All ${blks.length} components verified. No tampering detected. Supply chain integrity confirmed.</div>${dn}<div class="svacts" style="margin-top:12px"><button class="btnsv g" onclick="go('cleared')">Proceed to Deployment →</button></div>`;
+    document.getElementById('bship').textContent='Clear';document.getElementById('bship').className='nbadge grn';
+    pip('ver','done');pip('ship','done');
+  }
+}
+
+async function verifyInd(){
+  const nm=document.getElementById('ind-n').value.trim().toLowerCase();
+  const vr=document.getElementById('ind-v').value.trim();
+  const res=document.getElementById('ires');
+  if(!nm){toast('Enter a component name');return;}
+  const b=blks.find(x=>x.name.toLowerCase()===nm&&(!vr||x.ver===vr));
+  res.style.display='block';
+  if(!b){res.className='ires info';res.innerHTML=`<div class="irt">ℹ Component Not Found</div><div class="ird"><span>"${nm}" is not in this project's SBOM.</span><span>Go to Register SBOM to add it first.</span></div>`;return;}
+  if(!wcon||!b.oc){
+    res.className='ires info';res.innerHTML=`<div class="irt"><span class="spin"></span>Simulating verification...</div>`;
+    await new Promise(r=>setTimeout(r,1000));
+    const ok=b.oh===b.ch;b.ver2=!b.tamp;render();stats();
+    res.className=`ires ${ok?'ok':'bad'}`;
+    res.innerHTML=`<div class="irt">${ok?'✓ Verified — Component Intact':'✗ Tampered — Hash Mismatch Detected'}</div><div class="ird"><span><strong>${b.ico||'📦'} ${b.name}</strong> v${b.ver}</span><span style="margin-bottom:6px">${b.desc}</span><span class="hl">Registered: ${b.oh}</span><span class="hl">Current:&nbsp;&nbsp;&nbsp; ${b.ch}</span><span style="margin-top:7px;display:block;font-weight:600">${ok?'Hash matches. Component not modified.':'Hash mismatch. Modified after registration.'}</span><span style="margin-top:5px;display:block;font-size:11px;color:var(--blue)">⚡ Demo Mode — <button class="mcbtn" onclick="document.getElementById('conn-overlay').classList.add('on')">Connect MetaMask</button> to record on Ethereum</span></div>`;
+    return;
+  }
+  res.className='ires info';res.innerHTML=`<div class="irt"><span class="spin"></span>Confirm in MetaMask...</div><div class="ird"><span>A transaction will be sent to Ethereum Sepolia. MetaMask will open for confirmation.</span></div>`;
+  let ok=false,txh=null;
+  try{
+    const tx=await ctr.verifyComponent(b.name,b.ver,b32(b.ch));
+    res.innerHTML=`<div class="irt"><span class="spin"></span>Transaction submitted...</div><div class="ird"><span class="hl">Tx: ${tx.hash}</span></div>`;
+    const rc=await tx.wait();txh=rc.hash;
+    const r=await ctr.verifyComponent.staticCall(b.name,b.ver,b32(b.ch));ok=r.includes('VERIFIED');
+  }catch(e){
+    if(e.code==='ACTION_REJECTED'){res.className='ires info';res.innerHTML=`<div class="irt">Transaction Rejected</div><div class="ird"><span>You rejected the MetaMask transaction.</span></div>`;return;}
+    ok=b.oh===b.ch;
+  }
+  b.ver2=!b.tamp;render();stats();
+  res.className=`ires ${ok?'ok':'bad'}`;
+  res.innerHTML=`<div class="irt">${ok?'✓ Verified — Component Intact':'✗ Tampered — Hash Mismatch Detected'}</div><div class="ird"><span><strong>${b.ico||'📦'} ${b.name}</strong> v${b.ver}</span><span>${b.desc}</span><span class="hl">On-chain: ${b.oh}</span><span class="hl">Current:&nbsp; ${b.ch}</span>${txh?`<span class="hl" style="margin-top:5px">Tx: <a href="https://sepolia.etherscan.io/tx/${txh}" target="_blank" style="color:var(--blue);font-weight:600">${txh.slice(0,22)}... ↗</a></span>`:''}<span style="margin-top:6px;display:block;font-weight:600">${ok?'Hash matches. Verification permanently recorded on Ethereum Sepolia.':'Hash mismatch. TamperDetected event fired on-chain.'}</span></div>`;
+}
+
+function hints(){
+  const l=document.getElementById('hints');if(!l)return;l.innerHTML='';
+  blks.forEach(b=>{
+    const c=document.createElement('div');
+    c.style.cssText='padding:4px 13px;background:var(--white);border:1.5px solid var(--border);border-radius:20px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;';
+    c.textContent=`${b.name} v${b.ver}`;
+    c.onmouseover=()=>{c.style.borderColor='var(--blue)';c.style.color='var(--blue)';c.style.background='rgba(13,148,251,.05)';};
+    c.onmouseout=()=>{c.style.borderColor='var(--border)';c.style.color='var(--muted)';c.style.background='var(--white)';};
+    c.onclick=()=>{document.getElementById('ind-n').value=b.name;document.getElementById('ind-v').value=b.ver;};
+    l.appendChild(c);
+  });
+}
+
+function stats(){
+  document.getElementById('ds-c').textContent=blks.length;
+  document.getElementById('ds-t').textContent=blks.filter(b=>b.tamp).length;
+  document.getElementById('ds-v').textContent=blks.filter(b=>b.ver2&&!b.tamp).length;
+}
+
+function pip(id,st){
+  const d=document.getElementById('p-'+id),l=document.getElementById('pl-'+id);
+  if(!d)return;d.className='pd '+st;if(l)l.className='pl '+st;
+}
+
+function toast(msg){
+  const t=document.getElementById('tst');t.textContent=msg;t.classList.add('on');
+  clearTimeout(t._tid);t._tid=setTimeout(()=>t.classList.remove('on'),2700);
+}
+
+window.addEventListener('load',async()=>{banner();await demoLoad();});
+</script>
+</body>
+</html>
